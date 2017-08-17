@@ -4,7 +4,6 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
-  #config.vm.provision "docker"
   config.vm.provision "docker" do |d|
     d.post_install_provision "shell", path: "set-docker-mirror.sh"
   end
@@ -19,16 +18,20 @@ Vagrant.configure("2") do |config|
     host.vm.hostname = "devops-server"
     host.vm.network :private_network, ip: "10.10.10.10"
     host.vm.network :forwarded_port, guest: 8080, host: 8001
+    host.vm.network :forwarded_port, guest: 8081, host: 8002
+    host.disksize.size = "100GB"
 
     host.vm.provider "virtualbox" do |v|
       v.name = "devops-server"
-      v.memory = 1024
+      v.memory = 2048
       v.cpus = 2
     end
 
     host.vm.provision "docker" do |d|
       d.build_image "/vagrant/jenkins", args: "-t jenkins"
       d.run "jenkins", args: "-p 8080:8080 -p 5000:5000 -v /vagrant/var/jenkins_home:/var/jenkins_home -e TRY_UPGRADE_IF_NO_MARKER=true"
+      d.build_image "/vagrant/artifactory", args: "-t artifactory"
+      d.run "artifactory", args: "-p 8081:8081 -v /vagrant/var/artifactory_home:/var/opt/jfrog/artifactory"
     end
   end
 end
