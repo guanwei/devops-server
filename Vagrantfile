@@ -39,9 +39,9 @@ Vagrant.configure("2") do |config|
     host.vm.synced_folder "data/artifactory", "/data/artifactory", mount_options: ["uid=1030"]
 
     host.vm.provision "docker" do |d|
-      d.build_image "/vagrant/jenkins", args: "-t jenkins"
+      d.build_image "/vagrant/docker/jenkins", args: "-t jenkins"
       d.run "jenkins", args: "-p 8080:8080 -p 5000:5000 -v /data/jenkins:/var/jenkins_home -e TRY_UPGRADE_IF_NO_MARKER=true"
-      d.build_image "/vagrant/artifactory", args: "-t artifactory"
+      d.build_image "/vagrant/docker/artifactory", args: "-t artifactory"
       d.run "artifactory", args: "-p 8081:8081 -v /data/artifactory:/var/opt/jfrog/artifactory"
     end
   end
